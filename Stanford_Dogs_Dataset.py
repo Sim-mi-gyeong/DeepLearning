@@ -27,13 +27,18 @@ num_classes=metadata.features['label'].num_classes
 print(num_classes)
 
 
-# 입력이미지 크기를 224, [0,1]로 스케일 설정하고,  layer에 처리하기 
-IMG_SIZE=224
+# 입력이미지 크기를 224->229, [0,1]로 스케일 설정하고,  layer에 처리하기
+
+#IMG_SIZE=224
+
+IMG_SIZE=299
 
 resize_and_rescale=tf.keras.Sequential([
                                         layers.experimental.preprocessing.Resizing(IMG_SIZE, IMG_SIZE),
-                                        layers.experimental.preprocessing.Rescaling(1./255)   # 입력 이미지를 [0,1]로 scaling
+                                        layers.experimental.preprocessing.Rescaling(1./255),   # 입력 이미지를 [0,1]로 scaling
+                                        #layers.experimental.preprocessing.RandomZoom(0.2)
 ])
+
 
 # 모델 컴파일 목적으로 batch 크기를 작게 설정
 batch_size = 4
@@ -73,10 +78,41 @@ nb_valid_samples = 2400.
 # model train
 history = model.fit(
     train_ds, 
-    epochs = 2,
+    epochs = 10,
     steps_per_epoch = nb_train_samples//batch_size,
     validation_data = val_ds, 
     validation_steps = nb_valid_samples//batch_size,
     verbose = 1,
     shuffle = True
 )
+
+#test data를 일단 validation data로
+(eval_loss, eval_accuracy) = model.evaluate(val_ds, batch_size=batch_size, verbose=1)
+print("Validation Loss", eval_loss)
+print("Validation Accuracy", eval_accuracy)
+
+# loss, accuracy 그래프 표시
+plt.subplot()
+
+plt.title("Model Accuracy")
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+
+plt.ylabel('Accuracy')
+plt.xlabel('Epochs')
+plt.legend(["Training Accuracy", "Validation Accuracy"])
+plt.savefig('baseline_acc_epoch.png', transparent=False, bbox_inches='tight', dpi=900)
+plt.show()
+
+plt.title("Model Loss")
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.ylabel('loss')
+plt.xlabel('Epochs')
+plt.legend(["Training Loss", "Validation Loss"])
+plt.savefig('baseline_loss_epoch.png', transparent=False, bbox_inches='tight', dpi=900)
+plt.show()
+
+
+# 이미지 입력 크기 224->299로 성능 향상
+# 이미지 전처리 더 시도할 것
