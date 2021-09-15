@@ -1,4 +1,4 @@
 # DeepLearning
-TensorFlow, Keras
-Transfer Learning
+TensorFlow, Keras, 
+Transfer Learning, 
 Pytorch
